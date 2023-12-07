@@ -1,37 +1,38 @@
-package fpt.mantv.dao;
+package fpt.mantv.dao.impl;
 
+import fpt.mantv.dao.FileDAO;
 import fpt.mantv.entities.User;
 import fpt.mantv.exceptions.DAOException;
 
-import java.io.BufferedOutputStream;
 import java.io.EOFException;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
 //Using for bytes file
-public class UserDAODefault extends UserDAO{
+public class UserDAODefault implements FileDAO<User> {
+    private String fileName;
     public UserDAODefault(String fileName) {
-        super(fileName);
+        this.fileName = fileName;
     }
 
     @Override
     public List<User> readUsers() throws DAOException {
         List<User> users = new ArrayList<>();
         try{
-            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fileName));
+            ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(Paths.get(fileName)));
             User user;
             try{
                 while ((user = ((User) ois.readObject())) != null ){
                     users.add(user);
                 }
             } catch (EOFException e){
-
             }
             ois.close();
         }
@@ -42,7 +43,7 @@ public class UserDAODefault extends UserDAO{
     }
 
     @Override
-    public void writeUser(List<User> users) throws DAOException, IOException {
+    public void writeUser(List<User> users) throws  IOException {
         FileOutputStream fos = null;
         ObjectOutputStream oos = null;
         try {
